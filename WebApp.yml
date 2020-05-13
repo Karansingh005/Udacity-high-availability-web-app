@@ -1,7 +1,18 @@
+Description:
+  Deploying load balancer, Auto Scaling configuration and adding script to download content from S3 bucket.
+
 Parameters:
-# whatever you consider a changing value, put it as a parameter instead of hard-coding it into your script
+
+  EnvironmentName:
+    Description: An environment name that will be prefixed to resource names
+    Type: String
+  
+  WebAppLB:
+    Description: DNS Name for our Load Balancer
+    Type: String
 
 Resources:
+
   LBSecGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -19,6 +30,7 @@ Resources:
         FromPort: 80
         ToPort: 80
         CidrIp: 0.0.0.0/0
+
   WebServerSecGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -40,28 +52,30 @@ Resources:
         FromPort: 0
         ToPort: 65535
         CidrIp: 0.0.0.0/0
+
   WebAppLaunchConfig:
-        Type: AWS::AutoScaling::LaunchConfiguration
-        Properties:
-            UserData:
-            Fn::Base64: !Sub |
-                #!/bin/bash
-                apt-get update -y
-                apt-get install unzip awscli -y
-                apt-get install apache2 -y
-                systemctl start apache2.service
-                cd /var/www/html
-                aws s3 cp s3://udacity-demo-1/udacity.zip .
-                unzip -o udacity.zip
-            ImageId: ami-005bdb005fb00e791
-            IamInstanceProfile: ProfileWithRolesForOurApp
-            SecurityGroups:
-            - Ref: WebServerSecGroup
-            InstanceType: t3.small
-            BlockDeviceMappings:
-            - DeviceName: "/dev/sdk"
-            Ebs:
-                VolumeSize: '10'
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+        UserData:
+          Fn::Base64: !Sub |
+              #!/bin/bash
+              apt-get update -y
+              apt-get install unzip awscli -y
+              apt-get install apache2 -y
+              systemctl start apache2.service
+              cd /var/www/html
+              aws s3 cp s3://udacity-demo-1/udacity.zip .
+              unzip -o udacity.zip
+        ImageId: ami-003634241a8fcdec0
+        IamInstanceProfile: ProfileWithRolesForOurApp
+        KeyName: abc.
+        SecurityGroups:
+        - Ref: WebServerSecGroup
+        InstanceType: t2.medium
+        BlockDeviceMappings:
+        - DeviceName: "/dev/sdk"
+        Ebs:
+            VolumeSize: '10'
   ProfileWithRolesForOurApp:
     Type: AWS::IAM::InstanceProfile
     Properties: 
@@ -70,45 +84,45 @@ Resources:
   WebAppGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
-        VPCZoneIdentifier:
-        - Fn::ImportValue: 
-            !Sub "${EnvironmentName}-PRIV-NETS"
-        LaunchConfigurationName:
+      VPCZoneIdentifier:
+      - Fn::ImportValue: 
+          !Sub "${EnvironmentName}-PRIV-NETS"
+      LaunchConfigurationName:
         Ref: WebAppLaunchConfig
-        MinSize: !Ref Min-Size
-        MaxSize: !Ref Max-Size
-        TargetGroupARNs:
-        - Ref: WebAppTargetGroup
+      MinSize: '1'
+      MaxSize: '4'
+      TargetGroupARNs:
+      - Ref: WebAppTargetGroup
   WebAppLB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-        Subnets:
-        - Fn::ImportValue: !Sub "${EnvironmentName}-PUB1-SN"
-        - Fn::ImportValue: !Sub "${EnvironmentName}-PUB2-SN"
-        SecurityGroups:
-        - Ref: LBSecGroup
+      Subnets:
+      - Fn::ImportValue: !Sub "${EnvironmentName}-PUB1-SN"
+      - Fn::ImportValue: !Sub "${EnvironmentName}-PUB2-SN"
+      SecurityGroups:
+      - Ref: LBSecGroup
   Listener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
-        DefaultActions:
-        - Type: forward
-        TargetGroupArn:
-            Ref: WebAppTargetGroup
-        LoadBalancerArn:
+      DefaultActions:
+      - Type: forward
+      TargetGroupArn:
+          Ref: WebAppTargetGroup
+      LoadBalancerArn:
         Ref: WebAppLB
-        Port: '80'
-        Protocol: HTTP
+      Port: '80'
+      Protocol: HTTP
   ALBListenerRule:
         Type: AWS::ElasticLoadBalancingV2::ListenerRule
         Properties:
-        Actions:
-        - Type: forward
+          Actions:
+          - Type: forward
             TargetGroupArn: !Ref 'WebAppTargetGroup'
-        Conditions:
-        - Field: path-pattern
+          Conditions:
+          - Field: path-pattern
             Values: [/]
-        ListenerArn: !Ref 'Listener'
-        Priority: 1
+          ListenerArn: !Ref 'Listener'
+          Priority: 1
   WebAppTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
@@ -121,8 +135,8 @@ Resources:
         Protocol: HTTP
         UnhealthyThresholdCount: 5
         VpcId: 
-        Fn::ImportValue:
-            Fn::Sub: "${EnvironmentName}-VPCID"
+          Fn::ImportValue:
+              Fn::Sub: "${EnvironmentName}-VPCID"
   Outputs: 
     WebAppLB: 
         Description: A reference to DNS Name of Load Balancer
