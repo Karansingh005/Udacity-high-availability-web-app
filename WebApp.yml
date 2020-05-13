@@ -40,8 +40,8 @@ Resources:
           !Sub "${EnvironmentName}-VPCID"
       SecurityGroupIngress:
       - IpProtocol: tcp
-        FromPort: 8080
-        ToPort: 8080
+        FromPort: 80
+        ToPort: 80
         CidrIp: 0.0.0.0/0
       - IpProtocol: tcp
         FromPort: 22
@@ -52,7 +52,11 @@ Resources:
         FromPort: 0
         ToPort: 65535
         CidrIp: 0.0.0.0/0
-
+  ProfileWithRolesForOurApp:
+    Type: AWS::IAM::InstanceProfile
+    Properties: 
+      Roles:
+        - UdacityS3ReadOnlyEC2
   WebAppLaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
@@ -67,20 +71,15 @@ Resources:
             aws s3 cp s3://udacity-demo-1/udacity.zip .
             unzip -o udacity.zip
         ImageId: ami-003634241a8fcdec0
-        IamInstanceProfile: ProfileWithRolesForOurApp
+        IamInstanceProfile: !Ref ProfileWithRolesForOurApp
         KeyName: abc
         SecurityGroups:
         - Ref: WebServerSecGroup
         InstanceType: t2.medium
         BlockDeviceMappings:
         - DeviceName: "/dev/sdk"
-        Ebs:
+          Ebs:
             VolumeSize: '10'
-  ProfileWithRolesForOurApp:
-    Type: AWS::IAM::InstanceProfile
-    Properties: 
-      Roles:
-        - UdacityS3ReadOnlyEC2
   WebAppGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
@@ -106,7 +105,7 @@ Resources:
     Properties:
       DefaultActions:
       - Type: forward
-      TargetGroupArn:
+        TargetGroupArn:
           Ref: WebAppTargetGroup
       LoadBalancerArn:
         Ref: WebAppLB
@@ -131,15 +130,9 @@ Resources:
         HealthCheckProtocol: HTTP
         HealthCheckTimeoutSeconds: 8
         HealthyThresholdCount: 2
-        Port: 8080
+        Port: 80
         Protocol: HTTP
         UnhealthyThresholdCount: 5
         VpcId: 
           Fn::ImportValue:
               Fn::Sub: "${EnvironmentName}-VPCID"
-  Outputs: 
-    WebAppLB: 
-        Description: A reference to DNS Name of Load Balancer
-        Value: !Join ["",["http://", !GetAtt WebAppLB.DNSName, "/udagram.html"]]
-        Export:
-          Name: !Sub ${EnvironmentName}-DNSNameLB
