@@ -6,5 +6,13 @@
     {
         "ParameterKey": "WebAppLB",
         "ParameterValue": WebAppLB.DNSName
+    },
+    {
+        "ParameterKey": "Min-Size",
+        "ParameterValue": '2'
+    }.
+    {
+        "ParameterKey": "Max-Size",
+        "ParameterValue": '4'
     }
 ]

@@ -1,3 +1,9 @@
+Description:
+    This a cloud formation template for deploying two public subnets
+    and two private subnets, along with the NAT gateway and Internet Gateway.
+    These subnets are complimented by their routing tables, in this template.
+Parameters:
+
 Resources:
 
     VPC: 
