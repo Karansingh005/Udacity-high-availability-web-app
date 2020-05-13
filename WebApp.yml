@@ -7,7 +7,7 @@ Parameters:
     Description: An environment name that will be prefixed to resource names
     Type: String
   
-  WebAppLB:
+  WebAppLB1:
     Description: DNS Name for our Load Balancer
     Type: String
 
@@ -58,17 +58,17 @@ Resources:
     Properties:
         UserData:
           Fn::Base64: !Sub |
-              #!/bin/bash
-              apt-get update -y
-              apt-get install unzip awscli -y
-              apt-get install apache2 -y
-              systemctl start apache2.service
-              cd /var/www/html
-              aws s3 cp s3://udacity-demo-1/udacity.zip .
-              unzip -o udacity.zip
+            #!/bin/bash
+            apt-get update -y
+            apt-get install unzip awscli -y
+            apt-get install apache2 -y
+            systemctl start apache2.service
+            cd /var/www/html
+            aws s3 cp s3://udacity-demo-1/udacity.zip .
+            unzip -o udacity.zip
         ImageId: ami-003634241a8fcdec0
         IamInstanceProfile: ProfileWithRolesForOurApp
-        KeyName: abc.
+        KeyName: abc
         SecurityGroups:
         - Ref: WebServerSecGroup
         InstanceType: t2.medium
