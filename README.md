@@ -1,7 +1,7 @@
 # Udacity-high-availability-web-app
 This is a repository, conatining cloudformation scripts to deploy a highly available web application on Amazon Web Services platform. This repository was made, as a part of my Nanodegree project with Udacity. 
 
-##Requirements-to-run-the-scripts-on-your-local-machine
+## Requirements to run the scripts on your local machine
 Here are some of the requirements, to run these scripts on your local machine:
 1. Download a text editor like Microsoft Visual Studio Code. Link to download Microsoft Visual Studio Code: https://code.visualstudio.com/
 2. Set up an Amazon Web Services account. Here;s link to create your AWS account: https://portal.aws.amazon.com/billing/signup#/start
