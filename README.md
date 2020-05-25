@@ -18,5 +18,7 @@ Here are some of the requirements, to run these scripts on your local machine:
 2. Make sure that, the present working directory of your VS Code terminal, be same as the directory, where scripts are present. 
 3. Now, to depoy/create the cloud formation stack, write command: `$ ./create.sh <name-of-the-stack> <name-of-the-template-flie-in-yml> <name-of-the-parameters-file-in-json>`
 4. Make sure, to first deply [WebApp-Network.yml](https://github.com/Karansingh005/Udacity-high-availability-web-app/blob/master/WebApp-Network.yml) infrastruture, before deploying [WebApp.yml](https://github.com/Karansingh005/Udacity-high-availability-web-app/blob/master/WebApp.yml) scripts. And make sure to run [WebApp-Network-Paramters.json](https://github.com/Karansingh005/Udacity-high-availability-web-app/blob/master/WebApp-Network-Parameters.json) with WebApp-Network.yml and [WebApp-Paramters.json](https://github.com/Karansingh005/Udacity-high-availability-web-app/blob/master/WebApp-Parameters.json) with WebApp.yml.
+5. To update the created stack, run the following command: `$ ./update.sh <name-of-the-stack> <name-of-the-template-flie-in-yml> <name-of-the-parameters-file-in-json>`
+6. You can check AWS console, and go AWS Cloud Fomation to check if your cloud formation stack has been deployed, or not.
 
 Link to website: http://webap-webap-1dv4b250l3nc6-1257434246.us-west-2.elb.amazonaws.com/ (The link will not work now, since I've taken down the stack after the review of my project, to avaid extra costs)
